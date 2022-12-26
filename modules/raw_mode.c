@@ -1,7 +1,5 @@
 #include "../core/include/main.h"
 
-struct termios original_termios;
-
 /**
  * enable_raw_mode - allow inputs to be processed raw
  * Return: void - nothing
@@ -10,9 +8,9 @@ void enable_raw_mode()
 {
 	struct termios raw;
 
-	if (tcgetattr(STDIN_FILENO, &original_termios) == -1) die("tcgetatttr");
+	if (tcgetattr(STDIN_FILENO, &E.original_termios) == -1) die("tcgetatttr");
 	atexit(disable_raw_mode);
-	raw = original_termios;
+	raw = E.original_termios;
 	raw.c_iflag &= ~(ICRNL | IXON | BRKINT | INPCK | ISTRIP | IXON);
 	raw.c_oflag &= ~(OPOST);
 	raw.c_cflag |= ~(CS8);
@@ -28,7 +26,7 @@ void enable_raw_mode()
  */
 void disable_raw_mode()
 {
-	if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &original_termios) == -1)
+	if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &E.original_termios) == -1)
 		die("tcsetattr");
 }
 
@@ -39,6 +37,8 @@ void disable_raw_mode()
  */
 void die(const char *s)
 {
+	write(STDIN_FILENO, "\x1b[2J", 4);
+	write(STDIN_FILENO, "\x1b[H", 3);
 	perror(s);
 	exit(1);
 }
