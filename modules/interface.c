@@ -26,11 +26,31 @@ int get_win_size(int *row, int *col)
  */
 void draw_rows(struct buffer *ab)
 {
-	int x;
+	int x, padding;
 
 	for (x = 0; x < E.screenrows; x++)
 	{
-		append_buffer(ab, "~", 1);
+		if (x == E.screenrows / 3)
+		{
+			char welcome[80];
+			int welcomelen = snprintf(welcome, sizeof(welcome),
+						  "Durpla editor -- version %s", VERSION);
+			if (welcomelen > E.screencols) welcomelen = E.screencols;
+			padding = (E.screencols - welcomelen) / 2;
+			if (padding)
+			{
+				append_buffer(ab, "~", 1);
+				padding--;
+			}
+			while (padding--) append_buffer(ab, " ", 1);
+			append_buffer(ab, welcome, welcomelen);
+		}
+		else
+		{
+		        append_buffer(ab, "~", 1);
+		}
+
+		append_buffer(ab, "\x1b[K", 4);
 		if ( x < E.screenrows - 1)
 			append_buffer(ab, "\r\n", 2);
 	}
@@ -43,6 +63,8 @@ void draw_rows(struct buffer *ab)
  */
 void init_editor()
 {
+	E.cx = 0;
+	E.cy = 0;
 	if (get_win_size(&E.screenrows, &E.screencols) == -1) die("getWinSize");
 }
 
