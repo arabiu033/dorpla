@@ -9,10 +9,20 @@
 #include <unistd.h>
 #include <termios.h>
 #include <sys/ioctl.h>
+#include <sys/types.h>
 
+#define _DEFAULT_SOURCE 1
+#define _BSD_SOURCE
+#define _GNU_SOURCE
 #define CNTRL_KEY(k) ((k) & 0x1f) /** strip Control keys to their equivalent keys */
 #define BUFF_INIT {NULL, 0}
 #define VERSION "0.0.1"
+
+typedef struct editor_row
+{
+	int size;
+	char *line;
+} erow;
 
 struct config
 {
@@ -20,6 +30,8 @@ struct config
 	int screenrows;
 	int screencols;
 	int cx, cy;
+	int numrows;
+	erow *row;
 };
 struct config E;
 
@@ -55,5 +67,7 @@ int get_cursor_pos(int *, int *);
 void append_buffer(struct buffer *, const char *, int);
 void buffer_free(struct buffer *);
 void move_cursor(int);
+void open();
+void append_row(char *, size_t);
 
 #endif
