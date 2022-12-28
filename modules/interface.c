@@ -26,11 +26,12 @@ int get_win_size(int *row, int *col)
  */
 void draw_rows(struct buffer *ab)
 {
-	int x, padding;
+	int x, padding, filerow;
 
 	for (x = 0; x < E.screenrows; x++)
 	{
-		if (x >= E.numrows)
+		filerow = x + E.rowoff;
+		if (filerow >= E.numrows)
 		{
 			if (!E.numrows && x == E.screenrows / 3)
 			{
@@ -51,26 +52,26 @@ void draw_rows(struct buffer *ab)
 		}
 		else
 		{
-			int len = E.row[x].size;
+			int len = E.row[filerow].rsize - E.coloff;
+			if (len  < 0) len = 0;
 			if (len > E.screencols) len = E.screencols;
-			append_buffer(ab, E.row[x].line, len);
+			append_buffer(ab, &E.row[filerow].render[E.coloff], len);
 		}
 		append_buffer(ab, "\x1b[K", 4);
-		if ( x < E.screenrows - 1)
+		if (x < E.screenrows - 1)
 			append_buffer(ab, "\r\n", 2);
 	}
 }
 
 
 /**
- * init_editior - call getwinsize method before doing anything
+ * init_editior - initialize the editios config and
+ * call getwinsize method before doing anything
  * Return: void - nothing
  */
 void init_editor()
 {
-	E.cx = 0;
-	E.cy = 0;
-	E.numrows = 0;
+	E.cx = E.cy = E.numrows = E.rowoff = E.coloff = E.rx =  0;
 	E.row = NULL;
 	if (get_win_size(&E.screenrows, &E.screencols) == -1) die("getWinSize");
 }
