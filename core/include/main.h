@@ -17,11 +17,12 @@
 #define CNTRL_KEY(k) ((k) & 0x1f) /** strip Control keys to their equivalent keys */
 #define BUFF_INIT {NULL, 0}
 #define VERSION "0.0.1"
+#define TAB_STOP 8
 
 typedef struct editor_row
 {
-	int size;
-	char *line;
+	int size, rsize;
+	char *line, *render;
 } erow;
 
 struct config
@@ -30,8 +31,10 @@ struct config
 	int screenrows;
 	int screencols;
 	int cx, cy;
+	int rx;
 	int numrows;
 	erow *row;
+	int rowoff, coloff;
 };
 struct config E;
 
@@ -69,5 +72,8 @@ void buffer_free(struct buffer *);
 void move_cursor(int);
 void open();
 void append_row(char *, size_t);
+void scroll();
+void update_row(erow *);
+int row_cx_to_rx(erow *, int);
 
 #endif
