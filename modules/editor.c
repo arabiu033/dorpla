@@ -104,14 +104,30 @@ void clear_screen()
 	char buf[32];
 	struct buffer ab = BUFF_INIT;
 
+	scroll();
 	append_buffer(&ab, "\x1b[?25l", 6);
 	append_buffer(&ab, "\x1b[H", 3);
 	draw_rows(&ab);
-	snprintf(buf, sizeof(buf), "\x1b[%d;%dH", E.cy + 1, E.cx + 1);
+	snprintf(buf, sizeof(buf), "\x1b[%d;%dH",
+		 (E.cy - E.rowoff) + 1, (E.rx - E.coloff) + 1);
 	append_buffer(&ab, buf, strlen(buf));
 	append_buffer(&ab, "\x1b[?25h", 6);
 	write(STDIN_FILENO, ab.buff, ab.len);
 	buffer_free(&ab);
+}
+
+/**
+ * scroll - setup cursor location when moving off the screen
+ * Return: void - nothing
+ */
+void scroll()
+{
+	E.rx = 0;
+	if (E.cy < E.numrows) E.rx = row_cx_to_rx(&E.row[E.cy], E.cx);
+	if (E.cy < E.rowoff) E.rowoff = E.cy;
+	if (E.cy > E.rowoff + E.screenrows + 1) E.rowoff = E.cy - E.screenrows + 1;
+	if (E.rx < E.coloff) E.coloff = E.rx;
+	if (E.rx > E.coloff + E.screencols + 1) E.coloff = E.rx - E.screencols + 1;
 }
 
 
@@ -122,15 +138,33 @@ void clear_screen()
  */
 void move_cursor(int c)
 {
+	int len;
+	erow *row = (E.cy > E.numrows) ? NULL : &E.row[E.cy];
 	switch(c)
 	{
 	case ARROW_UP: if (E.cy) E.cy--;
 		break;
-	case ARROW_DOWN: if (E.cy != E.screenrows - 1) E.cy++;
+	case ARROW_DOWN: if (E.cy < E.numrows) E.cy++;
 		break;
-	case ARROW_RIGHT: if (E.cx != E.screencols - 1) E.cx++;
+	case ARROW_RIGHT:
+		if (row && E.cx < row->size) E.cx++;
+		else if (row && E.cx == row->size)
+		{
+			E.cy++;
+			E.cx = 0;
+		}
 		break;
-	case ARROW_LEFT: if (E.cx) E.cx--;
+	case ARROW_LEFT:
+		if (E.cx) E.cx--;
+		else if (E.cy > 0)
+		{
+			E.cy--;
+			E.cx = E.row[E.cy].size;
+		}
 		break;
 	}
+
+	row = (E.cy > E.numrows) ? NULL : &E.row[E.cy];
+	len =  row ? row->size : 0;
+	if (E.cx > len) E.cx = len;
 }
