@@ -48,7 +48,7 @@ void draw_rows(struct buffer *ab)
 				while (padding--) append_buffer(ab, " ", 1);
 				append_buffer(ab, welcome, welcomelen);
 			}
-			else append_buffer(ab, "~", 1);
+			else if (!E.numrows) append_buffer(ab, "~", 1);
 		}
 		else
 		{
@@ -58,8 +58,7 @@ void draw_rows(struct buffer *ab)
 			append_buffer(ab, &E.row[filerow].render[E.coloff], len);
 		}
 		append_buffer(ab, "\x1b[K", 4);
-		if (x < E.screenrows - 1)
-			append_buffer(ab, "\r\n", 2);
+		append_buffer(ab, "\r\n", 2);
 	}
 }
 
@@ -73,7 +72,11 @@ void init_editor()
 {
 	E.cx = E.cy = E.numrows = E.rowoff = E.coloff = E.rx =  0;
 	E.row = NULL;
+	E.filename = NULL;
+	E.statusmsg[0] = '\0';
+	E.statusmsg_time = 0;
 	if (get_win_size(&E.screenrows, &E.screencols) == -1) die("getWinSize");
+	E.screenrows -= 2;
 }
 
 /**
