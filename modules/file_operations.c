@@ -12,6 +12,8 @@ void open(char *file)
 	size_t cap;
 	ssize_t len;
 
+	free(E.filename);
+	E.filename = strdup(file);
 	if (!fp) die("fopen");
 	while ((len = getline(&line, &cap, fp)) != -1)
 	{

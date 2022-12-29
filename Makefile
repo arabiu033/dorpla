@@ -5,3 +5,4 @@ clean:
 	rm -f *~
 	rm -f ./core/src/*~
 	rm -f ./core/include/*~
+	rm -f ./modules/*~
