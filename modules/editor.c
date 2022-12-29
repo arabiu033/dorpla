@@ -115,6 +115,8 @@ void clear_screen()
 	append_buffer(&ab, "\x1b[?25l", 6);
 	append_buffer(&ab, "\x1b[H", 3);
 	draw_rows(&ab);
+	draw_status_bar(&ab);
+	draw_msg_bar(&ab);
 	snprintf(buf, sizeof(buf), "\x1b[%d;%dH",
 		 (E.cy - E.rowoff) + 1, (E.rx - E.coloff) + 1);
 	append_buffer(&ab, buf, strlen(buf));
@@ -132,7 +134,7 @@ void scroll()
 	E.rx = 0;
 	if (E.cy < E.numrows) E.rx = row_cx_to_rx(&E.row[E.cy], E.cx);
 	if (E.cy < E.rowoff) E.rowoff = E.cy;
-	if (E.cy > E.rowoff + E.screenrows + 1) E.rowoff = E.cy - E.screenrows + 1;
+	if (E.cy > E.rowoff + E.screenrows - 1) E.rowoff = E.cy - E.screenrows + 1;
 	if (E.rx < E.coloff) E.coloff = E.rx;
 	if (E.rx > E.coloff + E.screencols + 1) E.coloff = E.rx - E.screencols + 1;
 }
