@@ -9,6 +9,7 @@ int main(int argc, char *argv[])
 	enable_raw_mode();
 	init_editor();
 	if (argc >= 2) open(argv[1]);
+	status_msg("HELP: Ctrl-Q = quit");
 	while(1)
 	{
 		clear_screen();
