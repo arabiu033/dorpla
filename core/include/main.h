@@ -5,6 +5,8 @@
 #include <ctype.h>
 #include <string.h>
 #include <errno.h>
+#include <time.h>
+#include <stdarg.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <termios.h>
@@ -35,6 +37,9 @@ struct config
 	int numrows;
 	erow *row;
 	int rowoff, coloff;
+	char *filename;
+	char statusmsg[80];
+	time_t statusmsg_time;
 };
 struct config E;
 
@@ -75,5 +80,8 @@ void append_row(char *, size_t);
 void scroll();
 void update_row(erow *);
 int row_cx_to_rx(erow *, int);
+void draw_status_bar(struct buffer *);
+void status_msg(const char *, ...);
+void draw_msg_bar(struct buffer *);
 
 #endif
